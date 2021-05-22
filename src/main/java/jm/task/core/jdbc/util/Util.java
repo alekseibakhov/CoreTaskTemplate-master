@@ -6,6 +6,8 @@ public class Util {
     private final String URL = "jdbc:mysql://localhost:3306/new_schema";
     private final String USERNAME = "root1234";
     private final String PASSWORD = "1234";
+    private static SessionFactory sessionFactory = null;
+
 
     public Connection getConnection () {
         Connection connection = null;
@@ -15,20 +17,26 @@ public class Util {
             e.printStackTrace();
         }
         return connection;
-//
-//        Driver driver = null;
-//        try {
-//            driver = new com.mysql.cj.jdbc.Driver();
-//            DriverManager.registerDriver(driver);
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//        }
-//
-//        try (Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-//             Statement statement = connection.createStatement()) {
-//            statement.execute("INSERT into users (name, age, email) values ('telka', 24, 'badu@inbox.ru');");
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//        }
+    }
+
+    public static SessionFactory getConnectionHibernate() throws HibernateException {
+        Configuration configuration = new Configuration();
+
+        Properties properties = new Properties();
+
+        properties.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
+        properties.put(Environment.URL, URL);
+        properties.put(Environment.USER, USERNAME);
+        properties.put(Environment.PASS, PASSWORD);
+        properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
+        properties.put(Environment.SHOW_SQL, true);
+        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+        properties.put(Environment.HBM2DDL_AUTO, "update");
+        configuration.addAnnotatedClass(User.class);
+
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().
+                applySettings(properties).build();
+
+        return configuration.buildSessionFactory(serviceRegistry);
     }
 }
